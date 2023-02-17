@@ -46,12 +46,19 @@ export interface SitePrompt {
   prompt: string
 }
 
+export const defaultURL = 'https:arxiv.org/*'
+export const defaultBodyTag = '#abs'
+export const defaultDisplayTag = 'div[class="metatable"]'
+
 const userConfigWithDefaultValue = {
   triggerMode: TriggerMode.Always,
   theme: Theme.Auto,
   language: Language.Auto,
   prompt: Prompt,
   promptOverrides: [] as SitePrompt[],
+  URL: defaultURL,
+  bodyTag: defaultBodyTag,
+  displayTag: defaultDisplayTag,
 }
 
 export type UserConfig = typeof userConfigWithDefaultValue

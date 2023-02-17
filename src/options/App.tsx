@@ -3,6 +3,9 @@ import { Plus } from '@geist-ui/icons'
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
 import '../base.css'
 import {
+  defaultBodyTag,
+  defaultDisplayTag,
+  defaultURL,
   getUserConfig,
   Language,
   Prompt,
@@ -14,9 +17,9 @@ import {
 } from '../config'
 import logo from '../logo.png'
 import { detectSystemColorScheme, getExtensionVersion } from '../utils'
-import AddNewPromptModal from './AddNewPromptModal'
-import PromptCard from './PromptCard'
+import AddNewSiteConfigModal from './AddNewSiteConfigModal'
 import ProviderSelect from './ProviderSelect'
+import SiteCard from './SiteCard'
 
 function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => void }) {
   const [triggerMode, setTriggerMode] = useState<TriggerMode>(TriggerMode.Always)
@@ -24,6 +27,9 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
   const [prompt, setPrompt] = useState<string>(Prompt)
   const [promptOverrides, setPromptOverrides] = useState<SitePrompt[]>([])
   const [modalVisible, setModalVisible] = useState<boolean>(false)
+  const [URL, setURL] = useState<string>(defaultURL)
+  const [bodyTag, setBodyTag] = useState<string>(defaultBodyTag)
+  const [displayTag, setDisplayTag] = useState<string>(defaultDisplayTag)
 
   const { setToast } = useToasts()
 
@@ -32,7 +38,7 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
       setTriggerMode(config.triggerMode)
       setLanguage(config.language)
       setPrompt(config.prompt)
-      setPromptOverrides(config.promptOverrides)
+      setPromptOverrides(config.promptOverrides), setURL(config.URL)
     })
   }, [])
 
@@ -93,19 +99,28 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
       <main className="w-[600px] mx-auto mt-14">
         <Text h2>Options</Text>
         <Text h3 className="mt-5">
-          Prompt
+          Site Config
         </Text>
 
-        <PromptCard
-          header={'default'}
-          onSave={(prompt) => updateUserConfig({ prompt })}
+        <SiteCard
           prompt={prompt}
+          URL={URL}
+          bodyTag={bodyTag}
+          displayTag={displayTag}
+          onSave={(URL, prompt, bodyTag, displayTag) =>
+            updateUserConfig({
+              URL: URL,
+              prompt: prompt,
+              bodyTag: bodyTag,
+              displayTag: displayTag,
+            })
+          }
         />
 
         {promptOverrides.map((override, index) => {
           return (
             <div key={override.site} className="my-3">
-              <PromptCard
+              <SiteCard
                 header={override.site}
                 prompt={override.prompt}
                 onSave={(newPrompt) => {
@@ -133,7 +148,7 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
           Add Prompt
         </Button>
 
-        <AddNewPromptModal
+        <AddNewSiteConfigModal
           visible={modalVisible}
           onClose={closeModalHandler}
           onSave={({ site, prompt }) => {
