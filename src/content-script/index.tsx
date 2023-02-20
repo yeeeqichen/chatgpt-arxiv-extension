@@ -80,10 +80,11 @@ async function run() {
   let siteURL = 'https:arxiv.org/*'
   const userConfig = await getUserConfig()
   for (const url in userConfig.supportedURLs) {
-    if (url.indexOf(host) != -1) {
-      siteURL = url
+    if (userConfig.supportedURLs[url].indexOf(host) != -1) {
+      siteURL = userConfig.supportedURLs[url]
     }
   }
+  console.log(host)
   // console.log(siteURL)
   const searchInput = getPossibleElementByQuerySelector<HTMLInputElement>([])
   console.log('Try to Mount ChatGPT on', siteURL)

@@ -5,10 +5,12 @@ import '../base.css'
 import {
   defaultBodyTag,
   defaultDisplayTag,
+  defaultSiteConfigs,
   defaultURL,
   getUserConfig,
   Language,
   Prompt,
+  siteConfigs,
   SitePrompt,
   Theme,
   TriggerMode,
@@ -30,8 +32,8 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
   const [URL, setURL] = useState<string>(defaultURL)
   const [bodyTag, setBodyTag] = useState<string>(defaultBodyTag)
   const [displayTag, setDisplayTag] = useState<string>(defaultDisplayTag)
-  const [supportedURLs, setSupportedURLs] = useState<string[]>([])
-
+  const [supportedURLs, setSupportedURLs] = useState<string[]>([defaultURL])
+  const [siteConfigs, setSiteConfigs] = useState<siteConfigs>(defaultSiteConfigs)
   const { setToast } = useToasts()
 
   useEffect(() => {
@@ -39,7 +41,10 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
       setTriggerMode(config.triggerMode)
       setLanguage(config.language)
       setPrompt(config.prompt)
-      setPromptOverrides(config.promptOverrides), setURL(config.URL)
+      setPromptOverrides(config.promptOverrides)
+      setURL(config.URL)
+      setSupportedURLs(config.supportedURLs)
+      setSiteConfigs(config.siteConfigs)
     })
   }, [])
 
@@ -102,23 +107,29 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
         <Text h3 className="mt-5">
           Site Config
         </Text>
-        {}
-        <SiteCard
-          prompt={prompt}
-          URL={URL}
-          bodyTag={bodyTag}
-          displayTag={displayTag}
-          onSave={(URL, prompt, bodyTag, displayTag) =>
-            updateUserConfig({
-              URL: URL,
-              prompt: prompt,
-              bodyTag: bodyTag,
-              displayTag: displayTag,
-            })
-          }
-        />
+        {supportedURLs &&
+          supportedURLs.map((URL) => {
+            return (
+              <div key={URL} className="my-3">
+                <SiteCard
+                  prompt={siteConfigs[URL].prompt}
+                  URL={URL}
+                  bodyTag={siteConfigs[URL].bodyTag}
+                  displayTag={siteConfigs[URL].displayTag}
+                  onSave={(URL, prompt, bodyTag, displayTag) =>
+                    updateUserConfig({
+                      URL: URL,
+                      prompt: prompt,
+                      bodyTag: bodyTag,
+                      displayTag: displayTag,
+                    })
+                  }
+                />
+              </div>
+            )
+          })}
 
-        {promptOverrides.map((override, index) => {
+        {/* {promptOverrides.map((override, index) => {
           return (
             <div key={override.site} className="my-3">
               <SiteCard
@@ -142,7 +153,7 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
               />
             </div>
           )
-        })}
+        })} */}
 
         <Button mt={1} type="secondary" width={'100%'} onClick={() => setModalVisible(true)}>
           <Plus size={16} className="mx-2" />
