@@ -3,11 +3,10 @@ import '../base.css'
 import { getUserConfig, Theme } from '../config'
 import { detectSystemColorScheme } from '../utils'
 import ChatGPTContainer from './ChatGPTContainer'
-import { config, SearchEngine } from './search-engine-configs'
 import './styles.scss'
 import { getPossibleElementByQuerySelector } from './utils'
 
-async function mount(question: string, promptSource: string, siteConfig: SearchEngine) {
+async function mount(question: string, promptSource: string, siteConfig: any) {
   const container = document.createElement('div')
   container.className = 'chat-gpt-container'
 
@@ -24,11 +23,12 @@ async function mount(question: string, promptSource: string, siteConfig: SearchE
     container.classList.add('gpt-light')
   }
 
-  const siderbarContainer = getPossibleElementByQuerySelector(siteConfig.sidebarContainerQuery)
+  const siderbarContainer = getPossibleElementByQuerySelector([siteConfig.displayTag])
   if (siderbarContainer) {
     siderbarContainer.prepend(container)
   } else {
     container.classList.add('sidebar-free')
+    console.log('buggy')
     const appendContainer = getPossibleElementByQuerySelector(siteConfig.appendContainerQuery)
     if (appendContainer) {
       appendContainer.appendChild(container)
@@ -73,29 +73,30 @@ export async function requeryMount(question: string, index: number) {
   container?.appendChild(questionItem)
 }
 
-const siteRegex = new RegExp(Object.keys(config).join('|'))
-const siteName = location.hostname.match(siteRegex)![0]
-const siteConfig = config[siteName]
+// const siteConfig = config[siteName]
 
 async function run() {
-  const searchInput = getPossibleElementByQuerySelector<HTMLInputElement>(siteConfig.inputQuery)
-  console.debug('Try to Mount ChatGPT on', siteName)
-
-  if (siteConfig.bodyQuery) {
-    const bodyElement = getPossibleElementByQuerySelector(siteConfig.bodyQuery)
+  const host = location.hostname
+  let siteURL = 'https:arxiv.org/*'
+  const userConfig = await getUserConfig()
+  for (const url in userConfig.supportedURLs) {
+    if (url.indexOf(host) != -1) {
+      siteURL = url
+    }
+  }
+  // console.log(siteURL)
+  const searchInput = getPossibleElementByQuerySelector<HTMLInputElement>([])
+  console.log('Try to Mount ChatGPT on', siteURL)
+  const siteConfig = userConfig.siteConfigs[siteURL]
+  if (siteConfig.bodyTag) {
+    const bodyElement = getPossibleElementByQuerySelector([siteConfig.bodyTag])
     console.debug('bodyElement', bodyElement)
 
     if (bodyElement && bodyElement.textContent) {
       const bodyInnerText = bodyElement.textContent.trim().replace(/\s+/g, ' ').substring(0, 1500)
       console.log('Body: ' + bodyInnerText)
-      const userConfig = await getUserConfig()
-
-      const found = userConfig.promptOverrides.find(
-        (override) => new URL(override.site).hostname === location.hostname,
-      )
-      const question = found?.prompt ?? userConfig.prompt
-      const promptSource = found?.site ?? 'default'
-
+      const question = siteConfig.prompt
+      const promptSource = 'default'
       mount(question + bodyInnerText, promptSource, siteConfig)
     }
   }
@@ -113,6 +114,6 @@ async function run() {
 
 run()
 
-if (siteConfig.watchRouteChange) {
-  siteConfig.watchRouteChange(run)
-}
+// if (siteConfig.watchRouteChange) {
+//   siteConfig.watchRouteChange(run)
+// }

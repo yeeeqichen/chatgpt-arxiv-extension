@@ -30,6 +30,7 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
   const [URL, setURL] = useState<string>(defaultURL)
   const [bodyTag, setBodyTag] = useState<string>(defaultBodyTag)
   const [displayTag, setDisplayTag] = useState<string>(defaultDisplayTag)
+  const [supportedURLs, setSupportedURLs] = useState<string[]>([])
 
   const { setToast } = useToasts()
 
@@ -101,7 +102,7 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
         <Text h3 className="mt-5">
           Site Config
         </Text>
-
+        {}
         <SiteCard
           prompt={prompt}
           URL={URL}

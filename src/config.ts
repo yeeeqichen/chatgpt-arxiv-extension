@@ -54,11 +54,15 @@ const userConfigWithDefaultValue = {
   triggerMode: TriggerMode.Always,
   theme: Theme.Auto,
   language: Language.Auto,
-  prompt: Prompt,
-  promptOverrides: [] as SitePrompt[],
-  URL: defaultURL,
-  bodyTag: defaultBodyTag,
-  displayTag: defaultDisplayTag,
+  supportedURLs: [defaultURL],
+  siteConfigs: {
+    'https:arxiv.org/*': {
+      prompt: Prompt,
+      URL: defaultURL,
+      bodyTag: defaultBodyTag,
+      displayTag: defaultDisplayTag,
+    },
+  },
 }
 
 export type UserConfig = typeof userConfigWithDefaultValue
