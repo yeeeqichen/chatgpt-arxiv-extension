@@ -76,16 +76,17 @@ export async function requeryMount(question: string, index: number) {
 // const siteConfig = config[siteName]
 
 async function run() {
-  const host = location.hostname
-  let siteURL = 'https:arxiv.org/*'
+  const host = location.hostname.replace(/https:/, '')
+  let siteURL = 'none'
   const userConfig = await getUserConfig()
-  for (const url in userConfig.supportedURLs) {
-    if (userConfig.supportedURLs[url].indexOf(host) != -1) {
-      siteURL = userConfig.supportedURLs[url]
+  console.log(userConfig)
+  for (let i = 0; i < userConfig.supportedURLs.length; ++i) {
+    const url = userConfig.supportedURLs[i]
+    const url_host = url.replace(/https:\/?\/?/, '').replace(/\/.*/, '')
+    if (url_host === host) {
+      siteURL = url
     }
   }
-  console.log(host)
-  // console.log(siteURL)
   const searchInput = getPossibleElementByQuerySelector<HTMLInputElement>([])
   console.log('Try to Mount ChatGPT on', siteURL)
   const siteConfig = userConfig.siteConfigs[siteURL]

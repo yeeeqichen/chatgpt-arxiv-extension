@@ -56,33 +56,28 @@ export const defaultSiteConfigs = {
     bodyTag: defaultBodyTag,
     displayTag: defaultDisplayTag,
   },
+  'https://ieeexplore.ieee.org/document/*': {
+    prompt: Prompt,
+    URL: defaultURL,
+    bodyTag: 'div.abstract-text.row div.u-mb-1 div',
+    displayTag: 'div.u-pb-1.stats-document-abstract-publishedIn',
+  },
 }
-export type siteConfigs = typeof defaultSiteConfigs
+export const defaultSupportedURLs = ['https:arxiv.org/*', 'https://ieeexplore.ieee.org/document/*']
 
 const userConfigWithDefaultValue = {
   triggerMode: TriggerMode.Always,
   theme: Theme.Auto,
   language: Language.Auto,
-  supportedURLs: [defaultURL, 'https://ieeexplore.ieee.org/document/*'],
-  siteConfigs: {
-    'https:arxiv.org/*': {
-      prompt: Prompt,
-      URL: defaultURL,
-      bodyTag: defaultBodyTag,
-      displayTag: defaultDisplayTag,
-    },
-    'https://ieeexplore.ieee.org/document/*': {
-      prompt: Prompt,
-      URL: defaultURL,
-      bodyTag: 'div.abstract-text.row div.u-mb-1 div',
-      displayTag: 'div.u-pb-1.stats-document-abstract-publishedIn',
-    },
-  },
+  supportedURLs: defaultSupportedURLs,
+  siteConfigs: defaultSiteConfigs,
 }
 
 export type UserConfig = typeof userConfigWithDefaultValue
 
 export async function getUserConfig(): Promise<UserConfig> {
+  // Browser.storage.local.remove('supportedURLs')
+  // Browser.storage.local.remove('siteConfigs')
   const result = await Browser.storage.local.get(Object.keys(userConfigWithDefaultValue))
   return defaults(result, userConfigWithDefaultValue)
 }

@@ -3,15 +3,10 @@ import { Plus } from '@geist-ui/icons'
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
 import '../base.css'
 import {
-  defaultBodyTag,
-  defaultDisplayTag,
   defaultSiteConfigs,
-  defaultURL,
+  defaultSupportedURLs,
   getUserConfig,
   Language,
-  Prompt,
-  siteConfigs,
-  SitePrompt,
   Theme,
   TriggerMode,
   TRIGGER_MODE_TEXT,
@@ -26,23 +21,15 @@ import SiteCard from './SiteCard'
 function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => void }) {
   const [triggerMode, setTriggerMode] = useState<TriggerMode>(TriggerMode.Always)
   const [language, setLanguage] = useState<Language>(Language.Auto)
-  const [prompt, setPrompt] = useState<string>(Prompt)
-  const [promptOverrides, setPromptOverrides] = useState<SitePrompt[]>([])
   const [modalVisible, setModalVisible] = useState<boolean>(false)
-  const [URL, setURL] = useState<string>(defaultURL)
-  const [bodyTag, setBodyTag] = useState<string>(defaultBodyTag)
-  const [displayTag, setDisplayTag] = useState<string>(defaultDisplayTag)
-  const [supportedURLs, setSupportedURLs] = useState<string[]>([defaultURL])
-  const [siteConfigs, setSiteConfigs] = useState<siteConfigs>(defaultSiteConfigs)
+  const [supportedURLs, setSupportedURLs] = useState<string[]>(defaultSupportedURLs)
+  const [siteConfigs, setSiteConfigs] = useState(defaultSiteConfigs)
   const { setToast } = useToasts()
 
   useEffect(() => {
     getUserConfig().then((config) => {
       setTriggerMode(config.triggerMode)
       setLanguage(config.language)
-      setPrompt(config.prompt)
-      setPromptOverrides(config.promptOverrides)
-      setURL(config.URL)
       setSupportedURLs(config.supportedURLs)
       setSiteConfigs(config.siteConfigs)
     })
@@ -108,7 +95,8 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
           Site Config
         </Text>
         {supportedURLs &&
-          supportedURLs.map((URL) => {
+          supportedURLs.map((URL, index) => {
+            console.log(siteConfigs[URL])
             return (
               <div key={URL} className="my-3">
                 <SiteCard
@@ -116,57 +104,45 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
                   URL={URL}
                   bodyTag={siteConfigs[URL].bodyTag}
                   displayTag={siteConfigs[URL].displayTag}
-                  onSave={(URL, prompt, bodyTag, displayTag) =>
-                    updateUserConfig({
-                      URL: URL,
+                  onSave={(URL, prompt, bodyTag, displayTag) => {
+                    supportedURLs[index] = URL
+                    siteConfigs[URL] = {
                       prompt: prompt,
                       bodyTag: bodyTag,
                       displayTag: displayTag,
+                      URL: URL,
+                    }
+                    return updateUserConfig({
+                      supportedURLs: supportedURLs,
+                      siteConfigs: siteConfigs,
                     })
-                  }
+                  }}
                 />
               </div>
             )
           })}
 
-        {/* {promptOverrides.map((override, index) => {
-          return (
-            <div key={override.site} className="my-3">
-              <SiteCard
-                header={override.site}
-                prompt={override.prompt}
-                onSave={(newPrompt) => {
-                  const newOverride: SitePrompt = {
-                    site: override.site,
-                    prompt: newPrompt,
-                  }
-                  const newOverrides = promptOverrides.filter((o) => o.site !== override.site)
-                  newOverrides.splice(index, 0, newOverride)
-                  setPromptOverrides(newOverrides)
-                  return updateUserConfig({ promptOverrides: newOverrides })
-                }}
-                onDismiss={() => {
-                  const newOverrides = promptOverrides.filter((_, i) => i !== index)
-                  setPromptOverrides(newOverrides)
-                  return updateUserConfig({ promptOverrides: newOverrides })
-                }}
-              />
-            </div>
-          )
-        })} */}
-
         <Button mt={1} type="secondary" width={'100%'} onClick={() => setModalVisible(true)}>
           <Plus size={16} className="mx-2" />
-          Add Prompt
+          Add Site Config
         </Button>
 
         <AddNewSiteConfigModal
           visible={modalVisible}
           onClose={closeModalHandler}
-          onSave={({ site, prompt }) => {
-            const newOverride: SitePrompt = {
-              site,
-              prompt,
+          onSave={(URL, prompt, bodyTag, displayTag) => {
+            if (supportedURLs.indexOf(URL) != -1) {
+              setToast({
+                text: 'site config already exists! Please modify the existing one',
+                type: 'error',
+              })
+            }
+            supportedURLs[index] = URL
+            siteConfigs[URL] = {
+              prompt: prompt,
+              bodyTag: bodyTag,
+              displayTag: displayTag,
+              URL: URL,
             }
             const newOverrides = promptOverrides.concat([newOverride])
             setPromptOverrides(newOverrides)
