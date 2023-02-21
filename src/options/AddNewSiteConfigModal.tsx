@@ -5,9 +5,15 @@ import { isValidHttpUrl } from '../content-script/utils'
 function AddNewSiteConfigModal(props: {
   visible: boolean
   onClose: () => void
-  onSave: (newOverride: { site: string; prompt: string }) => Promise<void>
+  supportedURLs: string[]
+  onSave: (newOverride: {
+    site: string
+    prompt: string
+    bodyTag: string
+    displayTag: string
+  }) => Promise<void>
 }) {
-  const { visible, onClose, onSave } = props
+  const { visible, onClose, supportedURLs, onSave } = props
   const [site, setSite] = useState<string>('')
   const [bodyTag, setBodyTag] = useState<string>('')
   const [displayTag, setDisplayTag] = useState<string>('')
@@ -17,9 +23,12 @@ function AddNewSiteConfigModal(props: {
   const { setToast } = useToasts()
 
   function validateInput() {
-    const isSiteValid = isValidHttpUrl(site)
-    setSiteError(!isSiteValid)
-    if (!isSiteValid) {
+    if (!isValidHttpUrl(site.replace(/\*/, ''))) {
+      setSiteError(true)
+      return false
+    }
+    if (supportedURLs.indexOf(site) != -1) {
+      setSiteError(true)
       return false
     }
     const isPromptValid = prompt.trim().length > 0
@@ -48,7 +57,7 @@ function AddNewSiteConfigModal(props: {
         >
           {siteError && (
             <Text small type="error">
-              Site is not valid
+              Invalid or Duplicated Site.
             </Text>
           )}
         </Input>
@@ -90,13 +99,19 @@ function AddNewSiteConfigModal(props: {
           if (!validateInput()) {
             return
           }
-          onSave({ site, prompt })
+          console.log({
+            URL: site,
+            prompt: prompt,
+            bodyTag: bodyTag,
+            displayTag: displayTag,
+          })
+          onSave({ site, prompt, bodyTag, displayTag })
             .then(() => {
-              setToast({ text: 'New Prompt saved', type: 'success' })
+              setToast({ text: 'New site config saved', type: 'success' })
               close()
             })
             .catch(() => {
-              setToast({ text: 'Failed to save prompt', type: 'error' })
+              setToast({ text: 'Failed to save site config', type: 'error' })
             })
         }}
       >

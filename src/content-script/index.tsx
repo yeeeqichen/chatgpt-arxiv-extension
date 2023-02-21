@@ -79,13 +79,18 @@ async function run() {
   const host = location.hostname.replace(/https:/, '')
   let siteURL = 'none'
   const userConfig = await getUserConfig()
-  console.log(userConfig)
+  let supportedSite = false
   for (let i = 0; i < userConfig.supportedURLs.length; ++i) {
     const url = userConfig.supportedURLs[i]
     const url_host = url.replace(/https:\/?\/?/, '').replace(/\/.*/, '')
-    if (url_host === host) {
+    if (!supportedSite && url_host === host) {
       siteURL = url
+      supportedSite = true
     }
+  }
+  if (!supportedSite) {
+    console.debug('unsupported site')
+    return
   }
   const searchInput = getPossibleElementByQuerySelector<HTMLInputElement>([])
   console.log('Try to Mount ChatGPT on', siteURL)

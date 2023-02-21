@@ -91,10 +91,10 @@ function SiteCard(props: {
                 onClick={() =>
                   onDismiss()
                     .then(() => {
-                      setToast({ text: 'Prompt removed', type: 'success' })
+                      setToast({ text: 'Site config removed', type: 'success' })
                     })
                     .catch(() => {
-                      setToast({ text: 'Failed to remove prompt', type: 'error' })
+                      setToast({ text: 'Failed to remove site config', type: 'error' })
                     })
                 }
               />

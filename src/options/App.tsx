@@ -96,7 +96,6 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
         </Text>
         {supportedURLs &&
           supportedURLs.map((URL, index) => {
-            console.log(siteConfigs[URL])
             return (
               <div key={URL} className="my-3">
                 <SiteCard
@@ -117,6 +116,14 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
                       siteConfigs: siteConfigs,
                     })
                   }}
+                  onDismiss={() => {
+                    supportedURLs.splice(index, 1)
+                    delete siteConfigs[URL]
+                    return updateUserConfig({
+                      supportedURLs,
+                      siteConfigs,
+                    })
+                  }}
                 />
               </div>
             )
@@ -130,23 +137,19 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
         <AddNewSiteConfigModal
           visible={modalVisible}
           onClose={closeModalHandler}
-          onSave={(URL, prompt, bodyTag, displayTag) => {
-            if (supportedURLs.indexOf(URL) != -1) {
-              setToast({
-                text: 'site config already exists! Please modify the existing one',
-                type: 'error',
-              })
+          supportedURLs={supportedURLs}
+          onSave={(update) => {
+            supportedURLs[supportedURLs.length] = update.site
+            siteConfigs[update.site] = {
+              prompt: update.prompt,
+              bodyTag: update.bodyTag,
+              displayTag: update.displayTag,
+              URL: update.site,
             }
-            supportedURLs[index] = URL
-            siteConfigs[URL] = {
-              prompt: prompt,
-              bodyTag: bodyTag,
-              displayTag: displayTag,
-              URL: URL,
-            }
-            const newOverrides = promptOverrides.concat([newOverride])
-            setPromptOverrides(newOverrides)
-            return updateUserConfig({ promptOverrides: newOverrides })
+            return updateUserConfig({
+              supportedURLs: supportedURLs,
+              siteConfigs: siteConfigs,
+            })
           }}
         />
 
