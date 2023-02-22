@@ -1,5 +1,19 @@
 import Browser from 'webextension-polyfill'
 
+export function findSupportedURL(supportedURLs, host): [string, boolean] {
+  let siteURL = 'none'
+  let supportedSite = false
+  for (let i = 0; i < supportedURLs.length; ++i) {
+    const url = supportedURLs[i]
+    const url_host = url.replace(/https:\/?\/?/, '').replace(/\/.*/, '')
+    if (!supportedSite && url_host === host) {
+      siteURL = url
+      supportedSite = true
+    }
+  }
+  return [siteURL, supportedSite]
+}
+
 export function getPossibleElementByQuerySelector<T extends Element>(
   queryArray: string[],
 ): T | undefined {

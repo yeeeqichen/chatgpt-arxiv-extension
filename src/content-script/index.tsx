@@ -1,10 +1,10 @@
 import { render } from 'preact'
 import '../base.css'
-import { getUserConfig, Theme } from '../config'
+import { getUserConfig, Theme, UserConfig } from '../config'
 import { detectSystemColorScheme } from '../utils'
 import ChatGPTContainer from './ChatGPTContainer'
 import './styles.scss'
-import { getPossibleElementByQuerySelector } from './utils'
+import { findSupportedURL, getPossibleElementByQuerySelector } from './utils'
 
 async function mount(question: string, promptSource: string, siteConfig: any) {
   const container = document.createElement('div')
@@ -73,21 +73,10 @@ export async function requeryMount(question: string, index: number) {
   container?.appendChild(questionItem)
 }
 
-// const siteConfig = config[siteName]
-
 async function run() {
-  const host = location.hostname.replace(/https:/, '')
-  let siteURL = 'none'
-  const userConfig = await getUserConfig()
-  let supportedSite = false
-  for (let i = 0; i < userConfig.supportedURLs.length; ++i) {
-    const url = userConfig.supportedURLs[i]
-    const url_host = url.replace(/https:\/?\/?/, '').replace(/\/.*/, '')
-    if (!supportedSite && url_host === host) {
-      siteURL = url
-      supportedSite = true
-    }
-  }
+  const host: string = location.hostname
+  const userConfig: UserConfig = await getUserConfig()
+  const [siteURL, supportedSite]: [string, boolean] = findSupportedURL(userConfig.supportedURLs, host)
   if (!supportedSite) {
     console.debug('unsupported site')
     return
