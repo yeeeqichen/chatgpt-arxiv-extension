@@ -7,6 +7,7 @@ import {
   defaultSupportedURLs,
   getUserConfig,
   Language,
+  SiteConfigs,
   Theme,
   TriggerMode,
   TRIGGER_MODE_TEXT,
@@ -23,7 +24,7 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
   const [language, setLanguage] = useState<Language>(Language.Auto)
   const [modalVisible, setModalVisible] = useState<boolean>(false)
   const [supportedURLs, setSupportedURLs] = useState<string[]>(defaultSupportedURLs)
-  const [siteConfigs, setSiteConfigs] = useState(defaultSiteConfigs)
+  const [siteConfigs, setSiteConfigs] = useState<SiteConfigs>(defaultSiteConfigs)
   const { setToast } = useToasts()
 
   useEffect(() => {
@@ -95,33 +96,37 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
           Site Config
         </Text>
         {supportedURLs &&
-          supportedURLs.map((URL, index) => {
+          supportedURLs.map((supportedURL, index) => {
             return (
-              <div key={URL} className="my-3">
+              <div key={supportedURL} className="my-3">
                 <SiteCard
-                  prompt={siteConfigs[URL].prompt}
-                  URL={URL}
-                  bodyTag={siteConfigs[URL].bodyTag}
-                  displayTag={siteConfigs[URL].displayTag}
-                  onSave={(URL, prompt, bodyTag, displayTag) => {
-                    supportedURLs[index] = URL
-                    siteConfigs[URL] = {
-                      prompt: prompt,
-                      bodyTag: bodyTag,
-                      displayTag: displayTag,
-                      URL: URL,
+                  prompt={siteConfigs[supportedURL].prompt}
+                  URL={supportedURL}
+                  bodyTag={siteConfigs[supportedURL].bodyTag}
+                  displayTag={siteConfigs[supportedURL].displayTag}
+                  onSave={(URLValue, promptValue, bodyTagValue, displayTagValue) => {
+                    const updatedSupportedURLs: string[] = [...supportedURLs]
+                    updatedSupportedURLs[index] = URLValue
+                    const updatedSiteConfigs: SiteConfigs = JSON.parse(JSON.stringify(siteConfigs))
+                    updatedSiteConfigs[URLValue] = {
+                      prompt: promptValue,
+                      bodyTag: bodyTagValue,
+                      displayTag: displayTagValue,
                     }
                     return updateUserConfig({
-                      supportedURLs: supportedURLs,
-                      siteConfigs: siteConfigs,
+                      supportedURLs: updatedSupportedURLs,
+                      siteConfigs: updatedSiteConfigs,
                     })
                   }}
                   onDismiss={() => {
-                    supportedURLs.splice(index, 1)
-                    delete siteConfigs[URL]
+                    const updatedSupportedURLs: string[] = [...supportedURLs]
+                    updatedSupportedURLs.splice(index, 1)
+                    const updatedSiteConfigs: SiteConfigs = JSON.parse(JSON.stringify(siteConfigs))
+                    delete updatedSiteConfigs[supportedURL]
+                    setSupportedURLs(updatedSupportedURLs)
                     return updateUserConfig({
-                      supportedURLs,
-                      siteConfigs,
+                      supportedURLs: updatedSupportedURLs,
+                      siteConfigs: updatedSiteConfigs,
                     })
                   }}
                 />
@@ -144,7 +149,6 @@ function OptionsPage(props: { theme: Theme; onThemeChange: (theme: Theme) => voi
               prompt: update.prompt,
               bodyTag: update.bodyTag,
               displayTag: update.displayTag,
-              URL: update.site,
             }
             return updateUserConfig({
               supportedURLs: supportedURLs,

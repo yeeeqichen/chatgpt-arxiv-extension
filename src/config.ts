@@ -49,21 +49,20 @@ export interface SitePrompt {
 export const defaultURL = 'https:arxiv.org/*'
 export const defaultBodyTag = '#abs'
 export const defaultDisplayTag = 'div[class="metatable"]'
-export const defaultSiteConfigs = {
+export const defaultSiteConfigs: object = {
   'https:arxiv.org/*': {
     prompt: Prompt,
-    URL: defaultURL,
     bodyTag: defaultBodyTag,
     displayTag: defaultDisplayTag,
   },
   'https://ieeexplore.ieee.org/document/*': {
     prompt: Prompt,
-    URL: defaultURL,
     bodyTag: 'div.abstract-text.row div.u-mb-1 div',
     displayTag: 'div.u-pb-1.stats-document-abstract-publishedIn',
   },
 }
-export const defaultSupportedURLs = ['https:arxiv.org/*', 'https://ieeexplore.ieee.org/document/*']
+export type SiteConfigs = typeof defaultSiteConfigs
+export const defaultSupportedURLs: string[] = Object.keys(defaultSiteConfigs)
 
 const userConfigWithDefaultValue = {
   triggerMode: TriggerMode.Always,

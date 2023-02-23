@@ -1,7 +1,6 @@
 import { Button, Card, Divider, Grid, Text, Textarea, useToasts } from '@geist-ui/core'
 import Trash2 from '@geist-ui/icons/trash2'
 import { useCallback, useState } from 'preact/hooks'
-import { getUserConfig } from '../config'
 
 function SiteCard(props: {
   URL: string
@@ -23,23 +22,19 @@ function SiteCard(props: {
   const [displayTagValue, setDisplayTagValue] = useState<string>(displayTag)
   const { setToast } = useToasts()
 
-  const onClickSave = useCallback(
-    (URL: string, prompt: string, bodyTag: string, displayTag: string) => {
-      setURLValue(URL)
-      setPromptValue(prompt)
-      setBodyTagValue(bodyTag)
-      setDisplayTagValue(displayTag)
-      onSave(URL, prompt, bodyTag, displayTag)
-        .then(() => {
-          setToast({ text: 'Site config changes saved', type: 'success' })
-        })
-        .catch(() => {
-          setToast({ text: 'Failed to save site config', type: 'error' })
-        })
-      console.log(getUserConfig())
-    },
-    [onSave, setToast],
-  )
+  const onClickSave = useCallback(() => {
+    setURLValue(URLValue)
+    setPromptValue(promptValue)
+    setBodyTagValue(bodyTagValue)
+    setDisplayTagValue(displayTagValue)
+    onSave(URLValue, promptValue, bodyTagValue, displayTagValue)
+      .then(() => {
+        setToast({ text: 'Site config changes saved', type: 'success' })
+      })
+      .catch(() => {
+        setToast({ text: 'Failed to save site config', type: 'error' })
+      })
+  }, [onSave, setToast])
 
   return (
     <Card width="100%">
@@ -117,13 +112,7 @@ function SiteCard(props: {
         </Textarea>
       </Card.Content>
       <Card.Footer>
-        <Button
-          width="100%"
-          type="secondary"
-          ghost
-          onClick={() => onClickSave(URLValue, promptValue, bodyTagValue, displayTagValue)}
-          className="mt-3"
-        >
+        <Button width="100%" type="secondary" ghost onClick={() => onClickSave()} className="mt-3">
           Save Site Config
         </Button>
       </Card.Footer>
