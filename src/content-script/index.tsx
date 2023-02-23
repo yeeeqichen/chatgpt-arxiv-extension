@@ -76,7 +76,10 @@ export async function requeryMount(question: string, index: number) {
 async function run() {
   const host: string = location.hostname
   const userConfig: UserConfig = await getUserConfig()
-  const [siteURL, supportedSite]: [string, boolean] = findSupportedURL(userConfig.supportedURLs, host)
+  const [siteURL, supportedSite]: [string, boolean] = findSupportedURL(
+    userConfig.supportedURLs,
+    host,
+  )
   if (!supportedSite) {
     console.debug('unsupported site')
     return
@@ -92,7 +95,7 @@ async function run() {
       const bodyInnerText = bodyElement.textContent.trim().replace(/\s+/g, ' ').substring(0, 1500)
       console.log('Body: ' + bodyInnerText)
       const question = siteConfig.prompt
-      const promptSource = 'default'
+      const promptSource = host
       mount(question + bodyInnerText, promptSource, siteConfig)
     }
   }
